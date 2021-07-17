@@ -1,4 +1,5 @@
-﻿using BlazingPizza.Shared;
+﻿using BlazingPizza.Client.Services;
+using BlazingPizza.Shared;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -9,14 +10,23 @@ namespace BlazingPizza.Client.Pages
 {
     public partial class Index
     {
+        #region Servicios
+
         [Inject]
         public HttpClient HttpClient { get; set; }
 
+        [Inject]
+        public NavigationManager NavigationManager { get; set; }
+
+        [Inject]
+        public OrderState OrderState { get; set; }
+
+        #endregion
+
+
         #region Variables
         List<PizzaSpecial> Specials;
-        Pizza ConfiguringPizza;
-        bool ShowingConfigureDialog;
-        Order Order = new();
+    
         #endregion
 
         #region overrides
@@ -27,43 +37,23 @@ namespace BlazingPizza.Client.Pages
         #endregion
 
         #region Metodos
-        void ShowConfigPizzaDialog(PizzaSpecial special)
-        {
-            ConfiguringPizza = new()
-            {
-                Special = special,
-                SpecialId = special.Id,
-                Size = Pizza.DefaultSize,
-                Toppings = new List<PizzaTopping>()
-            };
-            ShowingConfigureDialog = true;
-        }
+       
 
         #endregion
 
         #region Manejador Eventos
-        void CancelConfigurePizzaDialog()
-        {
-            ConfiguringPizza = null;
-            ShowingConfigureDialog = false;
-        }
+        
 
-        void ConfirmConfigurePizzaDialog()
-        {
-            Order.Pizzas.Add(ConfiguringPizza);
-            ConfiguringPizza = null;
-            ShowingConfigureDialog = false;
-        }
+       
 
-        void RemoveConfiguredPizza(Pizza pizza)
-        {
-            Order.Pizzas.Remove(pizza);
-        }
+       
 
         async Task PlaceOrder()
         {
-            await HttpClient.PostAsJsonAsync("orders", Order);
-            Order = new Order();
+            var Response = await HttpClient.PostAsJsonAsync("orders", OrderState.Order );
+            var NewOrderId = await Response.Content.ReadFromJsonAsync<int>();
+            OrderState.ResetOrder();
+            NavigationManager.NavigateTo($"myorders/{NewOrderId}");
         }
 
         #endregion
