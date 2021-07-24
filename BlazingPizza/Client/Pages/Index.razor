@@ -41,10 +41,9 @@
     <div class="order-total @(OrderState.Order.Pizzas.Any() ? "" : "hidden")">
         Total:
         <span class="total-price">@OrderState.Order.GetFormattedTotalPrice()</span>
-        <button class="btn btn-warning"
-                @onclick="@PlaceOrder">
+        <a href="checkout" class="btn btn-warning">            
             Ordenar >
-        </button>
+        </a>
     </div>
 </div>
 
