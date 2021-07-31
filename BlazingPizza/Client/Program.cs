@@ -23,6 +23,9 @@ namespace BlazingPizza.Client
 
             builder.Services.AddScoped<OrderState>();
 
+            builder.Services.AddApiAuthorization();
+
+
             await builder.Build().RunAsync();
         }
     }

@@ -1,4 +1,5 @@
 using BlazingPizza.Server.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -25,7 +26,20 @@ namespace BlazingPizza.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<PizzaStoreContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("PizzaStore")));
+                     options.UseSqlServer(Configuration.GetConnectionString("PizzaStore")));
+
+
+            services.AddDatabaseDeveloperPageExceptionFilter();
+            services.AddDefaultIdentity<PizzaStoreUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                            .AddEntityFrameworkStores<PizzaStoreContext>();
+
+            services.AddIdentityServer()
+                    .AddApiAuthorization<PizzaStoreUser, PizzaStoreContext>();
+
+            services.AddAuthentication()
+                    .AddIdentityServerJwt();
+
+        
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
@@ -36,6 +50,7 @@ namespace BlazingPizza.Server
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseMigrationsEndPoint();
                 app.UseWebAssemblyDebugging();
             }
             else
@@ -50,6 +65,9 @@ namespace BlazingPizza.Server
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseIdentityServer();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
